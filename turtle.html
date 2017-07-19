@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Turtle Game</title>
+
+    <style>
+        html{
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<canvas style="max-width: 800px; max-height: 600px" id="canvas">
+
+</canvas>
+
+<script>
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+
+    canvas.width = 800;
+    canvas.height = 800;
+
+    var globalID;
+    var lastTime = new Date().getTime(), tick = new Date().getTime();
+    var delta = 0, targetUps = 1000 / 60, frames = 0, updates = 0;
+    var turtle = {
+        X: 200,
+        Y: 200,
+        YAW: 0,
+        IMAGE: null,
+        VELOCITY: {
+            X: 0,
+            Y: 0
+        }
+    };
+
+    var keys = [];
+
+    var img = new Image();
+    img.src = "assets/images/TURTLE_2.jpg";
+
+    img.onload = function () {
+         console.log("Loaded: " + name);
+
+        turtle.IMAGE = img;
+    };
+
+    const TERMINAL_VELOCITY = {
+        X: 10,
+        Y: 10
+    };
+
+    function render() {
+        var now = new Date().getTime();
+        delta += (now - lastTime) / targetUps;
+        lastTime = now;
+
+        if (delta >= 1) {
+            updates++;
+            delta--;
+
+            update();
+        }
+
+        draw();
+        frames++;
+
+        if (now - tick > 1000) {
+            tick = now;
+            console.log("FPS: " + frames, "UPDATES: " + updates);
+            frames = 0;
+            updates = 0;
+        }
+
+        globalID = requestAnimationFrame(render);
+    }
+
+    function update() {
+        var yAlt = false, xAlt = false;
+
+        for(var i = 0; i < keys.length; i++) {
+            switch (keys[i]) {
+                case 38:
+                    yAlt = true;
+                    if(turtle.VELOCITY.Y > -8) {
+                        turtle.VELOCITY.Y -= 0.2;
+                    }
+
+                    break;
+                case 39:
+                    xAlt = true;
+                    if(turtle.VELOCITY.X < 8){
+                        turtle.VELOCITY.X += 0.2;
+                    }
+
+                    break;
+                case 40:
+                    yAlt = true;
+                    if(turtle.VELOCITY.Y < 8) {
+                        turtle.VELOCITY.Y += 0.2;
+                    }
+
+                    break;
+                case 37:
+                    xAlt = true;
+                    if(turtle.VELOCITY.X > -8){
+                        turtle.VELOCITY.X -= 0.2;
+                    }
+
+                    break;
+            }
+        }
+
+        if(!yAlt){
+            if(turtle.VELOCITY.Y > .5){
+                turtle.VELOCITY.Y -= 0.15;
+            }else if(turtle.VELOCITY.Y < -.5) {
+                turtle.VELOCITY.Y += 0.15;
+            }else{
+                turtle.VELOCITY.Y = 0;
+            }
+        }
+
+        if(!xAlt){
+            if(turtle.VELOCITY.X > .5){
+                turtle.VELOCITY.X -= 0.15;
+            }else if(turtle.VELOCITY.X < -.5) {
+                turtle.VELOCITY.X += 0.15;
+            }else{
+                turtle.VELOCITY.X = 0;
+            }
+        }
+
+        turtle.X += turtle.VELOCITY.X;
+        turtle.Y += turtle.VELOCITY.Y;
+    }
+
+    function draw(){
+        context.fillStyle="#EBF4FA";
+        context.fillRect(0, 0, 800, 600);
+
+        if(turtle.IMAGE !== null){
+            context.drawImage(turtle.IMAGE, turtle.X, turtle.Y, 100, 75);
+        }
+    }
+
+    function clearCanvas() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.beginPath();
+    }
+
+    window.onkeydown = function(event){
+        if(keys.indexOf(event.keyCode) === -1){
+            keys.push(event.keyCode);
+        }
+    };
+
+    window.onkeyup = function(event){
+        if(keys.indexOf(event.keyCode) !== -1){
+            keys.splice(keys.indexOf(event.keyCode), 1);
+        }
+    };
+
+
+    render();
+</script>
+</body>
+</html>
